@@ -412,6 +412,8 @@
   <p> or Drag and Drop a .basis file</p>
 </body>
 <script>
+  loading(true);
+
   BASIS({
     onRuntimeInitialized: () => {
       var gl = elem('canvas').getContext('webgl');
