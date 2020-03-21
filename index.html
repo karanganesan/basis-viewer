@@ -32,11 +32,68 @@
       padding: 5px 10px;
       cursor: pointer;
     }
+
+    .lds-ripple {
+      display: inline-block;
+      position: relative;
+      width: 80px;
+      height: 80px;
+    }
+
+    .lds-ripple div {
+      position: absolute;
+      border: 4px solid #fff;
+      opacity: 1;
+      border-radius: 50%;
+      animation: lds-ripple 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+    }
+
+    .lds-ripple div:nth-child(2) {
+      animation-delay: -0.5s;
+    }
+
+    @keyframes lds-ripple {
+      0% {
+        top: 36px;
+        left: 36px;
+        width: 0;
+        height: 0;
+        opacity: 1;
+      }
+
+      100% {
+        top: 0px;
+        left: 0px;
+        width: 72px;
+        height: 72px;
+        opacity: 0;
+      }
+    }
+
+    #loading {
+      position: absolute;
+      z-index: 10000000;
+      width: 100vw;
+      height: 100vh;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      background-color: #333333a2;
+    }
   </style>
   <script src='./renderer.js'></script>
   <script src='./dxt-to-rgb565.js'></script>
   <script src='./transcoder/build/basis_transcoder.js'></script>
   <script type='text/javascript'>
+    let loading = state => {
+      console.log(state);
+      if (state) {
+        document.getElementById('loading').style.display = 'flex';
+      } else {
+        document.getElementById('loading').style.display = 'none';
+      }
+    }
+
     function log(s) {
       console.log(s);
     }
@@ -298,6 +355,8 @@
       canvas.width = alignedWidth;
       canvas.height = alignedHeight;
 
+      loading(false);
+
       if (format === BASIS_FORMAT.cTFASTC_4x4) {
         tex = renderer.createCompressedTexture(dst, alignedWidth, alignedHeight, COMPRESSED_RGBA_ASTC_4x4_KHR);
       }
@@ -337,6 +396,13 @@
 </head>
 
 <body>
+  <div id="loading">
+    <div class="lds-ripple">
+      <div></div>
+      <div></div>
+    </div>
+  </div>
+
   <canvas id='canvas'></canvas>
   <br>
   <input type='file' multiple id='inputEl' class="" />
@@ -388,6 +454,7 @@
   };
   const dropzone = new SimpleDropzone(document.body, inputEl);
   dropzone.on('drop', ({ files, archive }) => {
+    loading(true);
     files = Array.from(files);
     let blobURL = URL.createObjectURL(files[0][1]);
     if (fileType(files[0][0]) === 'basis') {
